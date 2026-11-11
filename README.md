@@ -67,24 +67,32 @@ friend;Freund | Freundin
 
 ## Gemeinsame Listen über GitHub pflegen
 
-### Direkt aus dem Trainer veröffentlichen
+### CSV-Dateien ablegen
 
-1. Die Wörter unter **Wortschatz** importieren und die Vorschau bestätigen.
-2. Bei der eigenen Liste **Auf GitHub speichern** auswählen.
-3. Im Dialog **Datei herunterladen** anklicken. Dabei wird eine einzelne Liste im passenden Repository-Format erzeugt, ohne Lernfortschritt oder lokale Kennungen.
-4. **GitHub-Upload öffnen** anklicken und auf GitHub mit deinem Konto anmelden. Der Link öffnet bereits den Ordner `data/decks` auf `main` in `fpiesik/fabivocs`.
-5. Die heruntergeladene Datei über **choose your files** auswählen und mit **Commit changes** bestätigen. Bei einem geschützten Branch oder fehlender Schreibberechtigung muss die Änderung zuerst über einen Pull Request übernommen werden.
-6. Die erfolgreiche Ausführung des Pages-Workflows abwarten und den Trainer auf den anderen Geräten neu laden. Im Dialog gibt es einen Link zum Veröffentlichungsstatus.
+Speichere deine CSV-Dateien direkt im Ordner [data/decks](data/decks) und pushe sie auf `main`. Jede Datei wird automatisch als eigene Vokabelliste erkannt. Der Listenname ist der Dateiname ohne `.csv`: `Unit 1.csv` erscheint als **Unit 1**. Eine zusätzliche Registrierung oder Änderung am Programm ist nicht nötig.
 
-Die Anmeldung und die Schreibberechtigung übernimmt ausschließlich GitHub. Der Trainer speichert keine Zugangsschlüssel und benötigt weder einen zusätzlichen Dienst noch ein eigenes Passwort. Das Herunterladen oder Öffnen von GitHub bedeutet noch nicht, dass die Liste veröffentlicht wurde. Der Ablauf verwendet GitHubs [Datei-Upload im Browser](https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository).
+Die erste Spalte enthält Englisch, die zweite Deutsch. Beispiel:
 
-Jede Liste wird einzeln übertragen. Der Dateiname wird aus dem Listennamen und einem Inhaltsfingerabdruck erzeugt: Wiederholte Downloads derselben Liste verwenden denselben Namen; unterschiedliche Inhalte bekommen unterschiedliche Namen. Den Namen beim Upload beibehalten. Der normale **Exportieren**-Button erstellt weiterhin eine Browser-Sicherung mit einem `decks`-Array; für den Repository-Upload bitte die Datei aus **Auf GitHub speichern** verwenden.
+```csv
+Englisch;Deutsch
+apple;Apfel
+book;Buch
+friend;Freund | Freundin
+```
 
-Die lokale Liste und ihr Lernfortschritt bleiben erhalten. Nach dem Deployment erscheint zusätzlich die gemeinsame Liste. Bei Bedarf kannst du die lokale Kopie später löschen. Änderungen am Inhalt erzeugen beim erneuten Veröffentlichen eine neue Datei; zum Ersetzen einer vorhandenen gemeinsamen Liste deren Datei direkt auf GitHub bearbeiten.
+- Als **UTF-8** speichern, in Excel die Option **CSV UTF-8** wählen.
+- Semikolon, Komma und Tabulator werden automatisch erkannt. Eine Kopfzeile wie `Englisch;Deutsch` ist optional.
+- Pro Zeile genau zwei Spalten; Texte mit Trennzeichen in Anführungszeichen setzen. Alternative Übersetzungen mit `|` trennen.
+- Jede CSV-Datei enthält eine Liste mit bis zu 5.000 Wortpaaren (maximal 2 MB). Die Endung `.CSV` funktioniert ebenfalls.
+- Dateien direkt im Ordner ablegen; Unterordner und andere Dateitypen werden ignoriert.
 
-Das Zielrepository und der Branch stehen in [src/github.js](src/github.js). Bei einem Fork diese Werte anpassen; der Veröffentlichungsbranch muss zum [Workflow](.github/workflows/pages.yml) passen.
+Eine fertige Beispielliste liegt unter [data/decks/Farben.csv](data/decks/Farben.csv).
 
-### Dateien direkt im Repository bearbeiten
+GitHub Actions baut und veröffentlicht die Website nach jeder Änderung auf `main`. Sobald der Workflow erfolgreich abgeschlossen ist, erscheint die neue oder geänderte Liste nach dem Neuladen auf allen Geräten. Entfernte Dateien verschwinden beim nächsten Deployment. Bei einer ungültigen Datei schlägt der Build mit dem Dateinamen und einer Fehlermeldung fehl; die zuletzt veröffentlichte Website bleibt verfügbar.
+
+Der Import im Browser bleibt für lokale Listen verfügbar. Für gemeinsame Listen genügt die CSV-Datei im Repository; es gibt keinen GitHub-Upload-Dialog im Trainer.
+
+### Vorhandene JSON-Listen
 
 Eine JSON-Datei im Ordner [data/decks](data/decks) anlegen oder bearbeiten:
 
@@ -100,7 +108,7 @@ Eine JSON-Datei im Ordner [data/decks](data/decks) anlegen oder bearbeiten:
 }
 ```
 
-Jede JSON-Datei enthält eine Liste. Der Build findet alle `.json`-Dateien in diesem Ordner, validiert die Inhalte und erstellt automatisch den Katalog. Nach dem Push auf `main` erscheinen die Änderungen nach dem erfolgreichen Deployment und Neuladen auf allen Geräten. Den Dateinamen möglichst beibehalten, damit der Lernfortschritt unveränderter Wortpaare zugeordnet bleibt. Eine gültige Liste muss vorhanden sein.
+Jede JSON-Datei enthält eine Liste. Bestehende JSON-Listen werden zusammen mit den CSV-Dateien eingelesen. Der Build validiert die Inhalte und erstellt automatisch den Katalog. Nach dem Push auf `main` erscheinen die Änderungen nach dem erfolgreichen Deployment und Neuladen auf allen Geräten. Den Dateinamen möglichst beibehalten, damit der Lernfortschritt unveränderter Wortpaare zugeordnet bleibt. Eine gültige Liste muss vorhanden sein.
 
 Gemeinsame Listen und Website sind öffentlich zugänglich. Nur Vokabeln eintragen, keine persönlichen Daten. Mitgelieferte Listen sind allgemeine Beispiele und keinem bestimmten Schulbuch zugeordnet.
 
@@ -114,10 +122,10 @@ Der Filter **Nur schwierige Wörter** enthält Wörter mit mindestens einem Fehl
 
 - [src/core.js](src/core.js): CSV-/JSON-Import, Antwortvergleich, Wortauswahl und Zeit-/Datumslogik.
 - [src/app.js](src/app.js): Oberfläche, Spielabläufe, Speicherung und Statistik.
-- [src/github.js](src/github.js): Zielrepository und Vorbereitung einzelner Listen für den GitHub-Upload.
 - [styles.css](styles.css): responsive Gestaltung, Tastaturfokus und reduzierte Bewegung.
 - [scripts/build.mjs](scripts/build.mjs): statischer Build und Validierung gemeinsamer Listen.
 - [tests/core.test.js](tests/core.test.js): automatisierte Tests mit Nodes eingebautem Test-Runner.
-- [tests/github.test.js](tests/github.test.js): Repository-Dateiformat, stabile sichere Dateinamen und große Listen.
+- [scripts/decks.mjs](scripts/decks.mjs): automatische Erkennung und Validierung gemeinsamer CSV-/JSON-Listen.
+- [tests/decks.test.js](tests/decks.test.js): Erkennung, Aktualisierung, CSV-Formate und Fehlermeldungen beim Build.
 
 Manuelle Browserprüfung: Listen importieren und exportieren, Lernrichtung wechseln, richtige/falsche Antworten und Überspringen prüfen, alle Spielmodi abschließen, den Timer ablaufen lassen und nach Neuladen die Persistenz prüfen. Auch die Ansicht auf einem schmalen Bildschirm und Bedienung per Tastatur prüfen.

@@ -1,19 +1,14 @@
-import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
-import { validateDeck } from '../src/core.js';
+import { loadSharedDecks } from './decks.mjs';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export async function build() {
   const output = resolve(root, 'dist');
+  const decks = await loadSharedDecks(resolve(root, 'data/decks'));
+  await rm(output, { recursive: true, force: true });
   await mkdir(resolve(output, 'data'), { recursive: true });
-  const files = (await readdir(resolve(root, 'data/decks'))).filter(file => file.endsWith('.json')).sort();
-  if (!files.length) throw new Error('Mindestens eine Vokabelliste in data/decks wird benötigt.');
-  const decks = [];
-  for (const file of files) {
-    const deck = validateDeck(JSON.parse(await readFile(resolve(root, 'data/decks', file), 'utf8')));
-    decks.push({ ...deck, id: `shared:${file}`, shared: true });
-  }
   for (const name of ['index.html', 'styles.css', 'src', 'assets', 'examples']) {
     await cp(resolve(root, name), resolve(output, name), { recursive: true });
   }

@@ -1,5 +1,4 @@
 import { STORAGE_KEY, alternatives, createQueue, importDecks, isCorrect, localDate, makeChoices, matchingWords, orient, remainingSeconds, shuffle, streak, validateDeck, vocabularySignature, wordKey } from './core.js';
-import { GITHUB_BRANCH, GITHUB_REPOSITORY, githubLinks, prepareRepositoryUpload } from './github.js';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -108,8 +107,8 @@ function renderSettings() {
 function renderLibrary() {
   $('#main').innerHTML = `${warning()}<section class="page-heading"><p class="eyebrow">DEINE WÖRTER, DEINE WELT</p><h1>Mein <span>Wortschatz.</span></h1><p>Alles, was du lernen möchtest, an einem Ort.</p></section>
     <div class="library-layout"><section><div class="section-title"><h2>Deine Vokabellisten <span class="count-badge">${allDecks().length}</span></h2><button class="text-button" id="export-all" ${!allDecks().length ? 'disabled' : ''}>Alle exportieren ↓</button></div>
-      <div class="deck-list">${allDecks().map(deck => `<article class="deck-card"><span class="deck-icon">${icon('book')}</span><div class="deck-info"><span class="eyebrow">${deck.shared ? 'GEMEINSAME LISTE' : 'DEINE EIGENE LISTE'}</span><h3>${escape(deck.name)}</h3><p>${deck.words.length} Wörter · ${escape(deck.sourceLanguage)} → ${escape(deck.targetLanguage)}</p><div class="deck-actions"><button class="text-button" data-use-deck="${escape(deck.id)}">Lernen →</button><button class="text-button" data-view-deck="${escape(deck.id)}">Ansehen</button><button class="text-button" data-export-deck="${escape(deck.id)}">Exportieren</button>${!deck.shared ? `<button class="text-button" data-publish-deck="${escape(deck.id)}">Auf GitHub speichern ↗</button><button class="text-button danger-text" data-delete-deck="${escape(deck.id)}">Löschen</button>` : ''}</div></div></article>`).join('') || '<div class="empty-state">Deine erste Liste wartet schon. Importiere rechts deine Wörter.</div>'}</div>
-      <div class="notice">Eigene Importe bleiben zunächst in diesem Browser. Über „Auf GitHub speichern“ kannst du sie mit deinem GitHub-Konto als gemeinsame Listen für alle Geräte veröffentlichen. „Exportieren“ erstellt eine lokale Sicherung.</div>
+      <div class="deck-list">${allDecks().map(deck => `<article class="deck-card"><span class="deck-icon">${icon('book')}</span><div class="deck-info"><span class="eyebrow">${deck.shared ? 'GEMEINSAME LISTE' : 'DEINE EIGENE LISTE'}</span><h3>${escape(deck.name)}</h3><p>${deck.words.length} Wörter · ${escape(deck.sourceLanguage)} → ${escape(deck.targetLanguage)}</p><div class="deck-actions"><button class="text-button" data-use-deck="${escape(deck.id)}">Lernen →</button><button class="text-button" data-view-deck="${escape(deck.id)}">Ansehen</button><button class="text-button" data-export-deck="${escape(deck.id)}">Exportieren</button>${!deck.shared ? `<button class="text-button danger-text" data-delete-deck="${escape(deck.id)}">Löschen</button>` : ''}</div></div></article>`).join('') || '<div class="empty-state">Deine erste Liste wartet schon. Importiere rechts deine Wörter.</div>'}</div>
+      <div class="notice">Gemeinsame Listen werden aus den CSV- und JSON-Dateien im Repository automatisch aktualisiert. Eigene Importe bleiben in diesem Browser. Mit „Exportieren“ kannst du sie sichern.</div>
     </section><section class="import-panel"><span class="mode-icon mint">${icon('upload')}</span><h2>Neue Wörter mitbringen</h2><p class="muted">Aus deiner Tabelle direkt ins nächste Spiel.</p><form id="import-form">
       <label for="import-name">Name der Liste</label><input id="import-name" name="name" maxlength="80" value="Meine Englisch-Vokabeln" required>
       <div class="two-cols"><div><label for="import-source">Erste Spalte</label><input id="import-source" name="sourceLanguage" maxlength="80" value="Englisch" required></div><div><label for="import-target">Zweite Spalte</label><input id="import-target" name="targetLanguage" maxlength="80" value="Deutsch" required></div></div>
@@ -142,33 +141,6 @@ function downloadJSON(content, filename) {
   (document.querySelector('dialog[open]') ?? document.body).append(a);
   a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-async function showRepositoryUpload(deck) {
-  if (!deck) return;
-  let upload;
-  try { upload = await prepareRepositoryUpload(deck); }
-  catch { toast('Die Datei konnte nicht vorbereitet werden. Bitte versuche es erneut.'); return; }
-  const dialog = document.createElement('dialog');
-  dialog.className = 'publish-dialog';
-  dialog.setAttribute('aria-labelledby', 'publish-title');
-  dialog.innerHTML = `<div class="dialog-heading"><h2 id="publish-title">Auf allen Geräten lernen</h2><button class="icon-button" data-close-dialog aria-label="Schließen">×</button></div>
-    <p>Veröffentliche <strong>${escape(deck.name)}</strong> mit deinem GitHub-Konto. Die Liste wird danach für alle Besucher des Trainers verfügbar.</p>
-    <ol class="publish-steps">
-      <li><strong>Vokabeldatei herunterladen</strong><p>Diese Datei ist bereits für die gemeinsame Vokabelliste vorbereitet.</p><button class="button secondary" id="download-repository-deck">Datei herunterladen ↓</button><span class="publish-filename">${escape(upload.filename)}</span></li>
-      <li><strong>Bei GitHub hochladen</strong><p>Melde dich auf GitHub mit deinem Konto an. Wähle dort über „choose your files“ die gerade heruntergeladene Datei aus.</p><a class="button primary" href="${escape(githubLinks.upload)}" target="_blank" rel="noopener noreferrer">GitHub-Upload öffnen ↗</a><span class="field-hint">Öffnet ${escape(GITHUB_REPOSITORY)} in einem neuen Tab, direkt im Vokabelordner.</span></li>
-      <li><strong>Speichern und kurz warten</strong><p>Bestätige auf GitHub mit „Commit changes“. Sobald die Änderung auf dem Branch <strong>${escape(GITHUB_BRANCH)}</strong> liegt und die Veröffentlichung erfolgreich ist, lade den Trainer auf deinen Geräten neu.</p><a class="text-button" href="${escape(githubLinks.actions)}" target="_blank" rel="noopener noreferrer">Veröffentlichung auf GitHub ansehen ↗</a></li>
-    </ol>
-    <p class="notice">Das Herunterladen allein veröffentlicht noch nichts. Deine lokale Liste und dein Lernfortschritt bleiben erhalten. Falls GitHub einen Pull Request erstellt, muss dieser zuerst zusammengeführt werden.</p>
-    <p class="muted">Die Anmeldung und Schreibberechtigung prüft GitHub. Hier werden weder Passwort noch Zugangsschlüssel benötigt.</p>
-    <button class="button secondary full-width" data-close-dialog>Zurück zu meinen Listen</button>`;
-  document.body.append(dialog);
-  dialog.querySelector('#download-repository-deck').addEventListener('click', () => {
-    downloadJSON(upload.content, upload.filename);
-    dialog.querySelector('#download-repository-deck').textContent = 'Datei erneut herunterladen ↓';
-  });
-  dialog.addEventListener('close', () => dialog.remove());
-  dialog.showModal();
 }
 
 function showDeck(deck) {
@@ -358,7 +330,6 @@ document.addEventListener('click', event => {
   if (button.dataset.useDeck) { selectedDeckId = button.dataset.useDeck; settings.difficult = false; location.hash = '#lernen'; }
   if (button.dataset.viewDeck) showDeck(allDecks().find(deck => deck.id === button.dataset.viewDeck));
   if (button.dataset.exportDeck) exportDecks(allDecks().filter(deck => deck.id === button.dataset.exportDeck));
-  if (button.dataset.publishDeck) showRepositoryUpload(saved.decks.find(deck => deck.id === button.dataset.publishDeck));
   if (id === 'export-all') exportDecks(allDecks());
   if (button.dataset.deleteDeck) {
     const deck = saved.decks.find(item => item.id === button.dataset.deleteDeck);
