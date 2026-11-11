@@ -1,0 +1,19 @@
+{
+  "name": "Abenteuer Tierwelt",
+  "sourceLanguage": "Englisch",
+  "targetLanguage": "Deutsch",
+  "words": [
+    { "front": "dog", "back": "Hund" },
+    { "front": "cat", "back": "Katze" },
+    { "front": "bird", "back": "Vogel" },
+    { "front": "horse", "back": "Pferd" },
+    { "front": "rabbit", "back": "Kaninchen" },
+    { "front": "fox", "back": "Fuchs" },
+    { "front": "bear", "back": "Bär" },
+    { "front": "lion", "back": "Löwe" },
+    { "front": "elephant", "back": "Elefant" },
+    { "front": "butterfly", "back": "Schmetterling" },
+    { "front": "frog", "back": "Frosch" },
+    { "front": "turtle", "back": "Schildkröte | Wasserschildkröte" }
+  ]
+}

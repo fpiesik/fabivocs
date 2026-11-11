@@ -1,0 +1,27 @@
+{
+  "name": "Meine ersten Wörter",
+  "sourceLanguage": "Englisch",
+  "targetLanguage": "Deutsch",
+  "words": [
+    { "front": "hello", "back": "hallo" },
+    { "front": "good morning", "back": "guten Morgen" },
+    { "front": "please", "back": "bitte" },
+    { "front": "thank you", "back": "danke | danke schön" },
+    { "front": "friend", "back": "Freund | Freundin" },
+    { "front": "school", "back": "Schule" },
+    { "front": "book", "back": "Buch" },
+    { "front": "pencil", "back": "Bleistift" },
+    { "front": "apple", "back": "Apfel" },
+    { "front": "water", "back": "Wasser" },
+    { "front": "sun", "back": "Sonne" },
+    { "front": "moon", "back": "Mond" },
+    { "front": "house", "back": "Haus" },
+    { "front": "garden", "back": "Garten" },
+    { "front": "happy", "back": "glücklich | fröhlich" },
+    { "front": "small", "back": "klein" },
+    { "front": "big", "back": "groß" },
+    { "front": "to play", "back": "spielen" },
+    { "front": "to read", "back": "lesen" },
+    { "front": "to learn", "back": "lernen" }
+  ]
+}

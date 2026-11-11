@@ -1,0 +1,13 @@
+{
+  "name": "fabivocs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ein kindgerechter Vokabeltrainer für GitHub Pages",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" }
+}

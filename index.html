@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#176b57">
+    <meta name="description" content="Dein Wortschatz wächst mit dir. Lerne Vokabeln mit Karteikarten, Wortpaaren und Speedruns – kostenlos und ohne Anmeldung.">
+    <title>FabiVocs · Dein Wortabenteuer</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Zum Inhalt</a>
+    <header class="site-header">
+      <a class="brand" href="#lernen" aria-label="FabiVocs Startseite"><span class="brand-icon" aria-hidden="true">F<span>v</span></span>Fabi<span>Vocs</span><span class="brand-dot">.</span></a>
+      <nav aria-label="Hauptnavigation">
+        <a href="#lernen" data-nav="lernen">Lernen</a>
+        <a href="#wortschatz" data-nav="wortschatz">Wortschatz</a>
+        <a href="#fortschritt" data-nav="fortschritt">Fortschritt</a>
+      </nav>
+      <button class="icon-button" id="help-button" aria-label="So funktioniert FabiVocs">?</button>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer class="site-footer"><span><span class="tiny-spark" aria-hidden="true">✦</span> Jeden Tag ein bisschen besser.</span><span>Ohne Anmeldung · Deine Lerndaten bleiben in diesem Browser</span></footer>
+    <div id="toast" role="status" class="toast" hidden></div>
+    <dialog id="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-heading"><h2 id="help-title">Hallo, Wortentdecker!</h2><button class="icon-button" data-close-dialog aria-label="Schließen">×</button></div>
+      <p>Wähle eine Vokabelliste, suche dir ein Spiel aus und leg los. Falsche Antworten sind kein Problem: Sie zeigen dir, was du noch üben kannst.</p>
+      <ol class="help-list"><li><strong>Deine Wörter:</strong> Unter „Wortschatz“ kannst du CSV- und JSON-Dateien importieren oder Wortpaare einfügen.</li><li><strong>Dein Tempo:</strong> Übe ganz entspannt oder stelle dich einem Speedrun.</li><li><strong>Dein Fortschritt:</strong> Richtige Antworten und Bestzeiten werden auf diesem Gerät gespeichert.</li></ol>
+      <p class="muted">Kein Konto, kein Tracking. Browserdaten können gelöscht werden. Exportiere eigene Listen als Sicherung. Bei Speedruns läuft die Zeit auch weiter, wenn du den Tab wechselst.</p>
+      <button class="button primary" data-close-dialog>Alles klar, los geht’s!</button>
+    </dialog>
+    <noscript>Bitte aktiviere JavaScript, um den Vokabeltrainer zu verwenden.</noscript>
+  </body>
+</html>
