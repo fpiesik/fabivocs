@@ -1,0 +1,25 @@
+{
+  "name": "Klasse 5 – At school",
+  "sourceLanguage": "Englisch",
+  "targetLanguage": "Deutsch",
+  "words": [
+    { "front": "classroom", "back": "Klassenzimmer | Klassenraum" },
+    { "front": "teacher", "back": "Lehrer | Lehrerin" },
+    { "front": "pupil", "back": "Schüler | Schülerin" },
+    { "front": "schoolbag", "back": "Schultasche | Schulranzen" },
+    { "front": "ruler", "back": "Lineal" },
+    { "front": "rubber", "back": "Radiergummi" },
+    { "front": "exercise book", "back": "Heft | Schulheft" },
+    { "front": "timetable", "back": "Stundenplan" },
+    { "front": "homework", "back": "Hausaufgaben" },
+    { "front": "break", "back": "Pause" },
+    { "front": "subject", "back": "Fach | Schulfach" },
+    { "front": "question", "back": "Frage" },
+    { "front": "answer", "back": "Antwort" },
+    { "front": "to listen", "back": "zuhören" },
+    { "front": "to write", "back": "schreiben" },
+    { "front": "to spell", "back": "buchstabieren" },
+    { "front": "Can you help me?", "back": "Kannst du mir helfen? | Können Sie mir helfen?" },
+    { "front": "I don't understand.", "back": "Ich verstehe nicht. | Ich verstehe das nicht." }
+  ]
+}

@@ -134,9 +134,21 @@ export function remainingSeconds(start, duration, now) {
 }
 
 export function createQueue(words, count) {
+  if (!words.length || count <= 0) return [];
   const queue = [];
   while (queue.length < count) queue.push(...shuffle(words));
   return queue.slice(0, count);
+}
+
+// Compact identity for comparing records without storing a full deck per round.
+export function vocabularySignature(words) {
+  const text = JSON.stringify(words.map(word => [word.front, word.back]).sort());
+  let first = 2166136261, second = 5381;
+  for (let i = 0; i < text.length; i++) {
+    first = Math.imul(first ^ text.charCodeAt(i), 16777619);
+    second = Math.imul(second, 33) ^ text.charCodeAt(i);
+  }
+  return `${text.length}:${(first >>> 0).toString(16)}:${(second >>> 0).toString(16)}`;
 }
 
 export function matchingWords(words, direction, limit = 6) {
