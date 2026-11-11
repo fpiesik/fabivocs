@@ -26,6 +26,14 @@ export function orient(word, direction) {
   return direction === 'reverse' ? { prompt: word.back, answer: word.front } : { prompt: word.front, answer: word.back };
 }
 
+export function practiceDirections(word, direction, { deckId, progress = {}, difficult = false } = {}) {
+  const directions = direction === 'mixed' ? ['forward', 'reverse'] : [direction];
+  return difficult ? directions.filter(value => {
+    const state = progress[wordKey(deckId, word, value)];
+    return state?.wrong > 0 && state.streak < 3;
+  }) : directions;
+}
+
 export function makeChoices(word, words, direction, random = Math.random) {
   const expected = orient(word, direction).answer;
   const correct = alternatives(expected)[0];
@@ -154,7 +162,7 @@ export function vocabularySignature(words) {
 export function matchingWords(words, direction, limit = 6) {
   const prompts = new Set(), answers = new Set(), selected = [];
   for (const word of shuffle(words)) {
-    const entry = orient(word, direction);
+    const entry = orient(word, typeof direction === 'function' ? direction(word) : direction);
     const prompt = normalize(alternatives(entry.prompt)[0]);
     const answer = normalize(alternatives(entry.answer)[0]);
     if (prompts.has(prompt) || answers.has(answer)) continue;

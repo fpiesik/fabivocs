@@ -1,4 +1,4 @@
-import { STORAGE_KEY, alternatives, createQueue, importDecks, isCorrect, localDate, makeChoices, matchingWords, orient, remainingSeconds, shuffle, streak, validateDeck, vocabularySignature, wordKey } from './core.js';
+import { STORAGE_KEY, alternatives, createQueue, importDecks, isCorrect, localDate, makeChoices, matchingWords, orient, practiceDirections, remainingSeconds, shuffle, streak, validateDeck, vocabularySignature, wordKey } from './core.js';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -38,7 +38,9 @@ let selectedDeckId = '', selectedMode = 'practice', session = null, timer = null
 let settings = { direction: 'forward', answer: 'choice', length: '10', duration: '60', target: '10', difficult: false };
 const allDecks = () => [...sharedDecks, ...saved.decks];
 const currentDeck = () => allDecks().find(deck => deck.id === selectedDeckId) ?? allDecks()[0];
-const activeWords = deck => settings.difficult ? deck.words.filter(word => { const p = saved.progress[wordKey(deck.id, word, settings.direction)]; return p?.wrong > 0 && p.streak < 3; }) : deck.words;
+const directionsFor = (deck, word) => practiceDirections(word, settings.direction, { deckId: deck.id, progress: saved.progress, difficult: settings.difficult });
+const activeWords = deck => deck.words.filter(word => directionsFor(deck, word).length > 0);
+const randomDirection = directions => directions[Math.floor(Math.random() * directions.length)];
 const answerLabel = answer => answer === 'choice' ? 'Multiple Choice' : 'Freies Schreiben';
 
 function persist() {
@@ -78,7 +80,7 @@ function renderHome() {
     <section class="learning-layout" aria-label="Training einstellen">
       <aside class="setup-panel"><div class="section-number">01 <span>DEINE WÖRTER</span></div><h2>Was üben wir?</h2>
         ${deck ? `<label for="deck-select">Vokabelliste</label><select id="deck-select">${allDecks().map(item => `<option value="${escape(item.id)}" ${item.id === deck.id ? 'selected' : ''}>${escape(item.name)}</option>`).join('')}</select><p class="field-hint">${icon('book')} ${deck.words.length} Wörter · ${escape(deck.sourceLanguage)} & ${escape(deck.targetLanguage)}</p>
-        <label for="direction-select">Lernrichtung</label><select id="direction-select"><option value="forward" ${settings.direction === 'forward' ? 'selected' : ''}>${escape(deck.sourceLanguage)} → ${escape(deck.targetLanguage)}</option><option value="reverse" ${settings.direction === 'reverse' ? 'selected' : ''}>${escape(deck.targetLanguage)} → ${escape(deck.sourceLanguage)}</option></select>
+        <label for="direction-select">Lernrichtung</label><select id="direction-select"><option value="forward" ${settings.direction === 'forward' ? 'selected' : ''}>${escape(deck.sourceLanguage)} → ${escape(deck.targetLanguage)}</option><option value="reverse" ${settings.direction === 'reverse' ? 'selected' : ''}>${escape(deck.targetLanguage)} → ${escape(deck.sourceLanguage)}</option><option value="mixed" ${settings.direction === 'mixed' ? 'selected' : ''}>Gemischt</option></select><p class="field-hint">Bei „Gemischt“ wird die Richtung für jedes Wort zufällig gewählt.</p>
         <label class="checkbox-label"><input id="difficult-only" type="checkbox" ${settings.difficult ? 'checked' : ''}> Nur schwierige Wörter</label><p class="field-hint">Wörter mit Fehlern, bis du sie dreimal in Folge richtig beantwortest.</p>` : '<p>Noch keine Wörter da. Importiere deine erste Liste!</p>'}
         <a href="#wortschatz" class="import-link">${icon('upload')} Eigene Wörter importieren ${icon('arrow')}</a>
         <div class="little-tip"><span aria-hidden="true">✦</span><p><strong>Kleiner Lerntipp</strong>Lieber jeden Tag ein paar Wörter als alle auf einmal.</p></div>
@@ -153,11 +155,16 @@ function startGame() {
   const deck = currentDeck(); if (!deck) return;
   const words = activeWords(deck); if (!words.length) return;
   const mode = selectedMode;
-  const pool = mode === 'match' ? matchingWords(words, settings.direction) : words;
+  const directions = new Map(words.map(word => [word, directionsFor(deck, word)]));
+  const matchDirections = mode === 'match' ? new Map(words.map(word => [word, randomDirection(directions.get(word))])) : new Map();
+  const pool = mode === 'match' ? matchingWords(words, word => matchDirections.get(word)) : words;
   const length = settings.length === 'all' ? words.length : Math.min(Number(settings.length), words.length);
   const queue = mode === 'match' ? pool : mode === 'sprint' || mode === 'race' ? createQueue(pool, Math.max(30, pool.length)) : shuffle(pool).slice(0, length);
   const answer = settings.answer === 'choice' && words.length < 2 ? 'write' : settings.answer;
   session = { deck, words: pool, queue, mode, answer, direction: settings.direction, duration: Number(settings.duration), target: Number(settings.target), index: 0, correct: 0, total: 0, start: performance.now(), feedback: null, revealed: false, mistakes: [], rightOrder: shuffle(pool.map((_, index) => index)), matched: [], left: null, right: null, matchFeedback: '', locked: false };
+  session.directions = directions;
+  session.matchDirections = matchDirections;
+  session.questionDirection = null;
   result = null; location.hash = '#spiel';
   renderGame();
   clearInterval(timer);
@@ -191,11 +198,13 @@ function renderGame() {
 }
 
 function renderQuestion() {
-  const s = session, word = s.queue[s.index], entry = orient(word, s.direction);
-  const from = s.direction === 'forward' ? s.deck.sourceLanguage : s.deck.targetLanguage;
-  const to = s.direction === 'forward' ? s.deck.targetLanguage : s.deck.sourceLanguage;
+  const s = session, word = s.queue[s.index];
+  s.questionDirection ??= randomDirection(s.directions.get(word));
+  const entry = orient(word, s.questionDirection);
+  const from = s.questionDirection === 'forward' ? s.deck.sourceLanguage : s.deck.targetLanguage;
+  const to = s.questionDirection === 'forward' ? s.deck.targetLanguage : s.deck.sourceLanguage;
   const cards = s.mode === 'cards';
-  const choices = s.answer === 'choice' ? makeChoices(word, s.words, s.direction) : [];
+  const choices = s.answer === 'choice' ? makeChoices(word, s.words, s.questionDirection) : [];
   if (!cards && choices.length < 2) s.currentAnswer = 'write'; else s.currentAnswer = s.answer;
   $('#question-area').innerHTML = `<div class="question-card"><p class="eyebrow">${escape(from)} → ${escape(to)}</p><p class="question-instruction">${cards ? 'Kennst du die Übersetzung?' : `Wie heißt das auf ${escape(to)}?`}</p><h1 class="question-word">${escape(alternatives(entry.prompt).join(' / '))}</h1>
     ${cards ? `<div class="card-reveal" aria-live="polite">${s.revealed ? `<span class="eyebrow">DIE ÜBERSETZUNG</span><strong>${escape(alternatives(entry.answer).join(' / '))}</strong>` : '<span>Erst kurz überlegen …</span>'}</div><div class="card-actions">${s.revealed ? '<button class="button secondary" data-card-grade="wrong">Noch üben</button><button class="button primary" data-card-grade="correct">Das wusste ich ✓</button>' : '<button class="button primary" id="reveal-card">Karte umdrehen ↻</button>'}</div>` : `
@@ -208,10 +217,10 @@ function renderQuestion() {
   if (cards && s.revealed) $('[data-card-grade="wrong"]').focus();
 }
 
-function recordAnswer(word, correct) {
+function recordAnswer(word, correct, direction = session.questionDirection) {
   const s = session;
   s.total++; if (correct) s.correct++;
-  const key = wordKey(s.deck.id, word, s.direction);
+  const key = wordKey(s.deck.id, word, direction);
   const previous = saved.progress[key] ?? { correct: 0, wrong: 0, streak: 0 };
   saved.progress[key] = { correct: (Number(previous.correct) || 0) + (correct ? 1 : 0), wrong: (Number(previous.wrong) || 0) + (correct ? 0 : 1), streak: correct ? (Number(previous.streak) || 0) + 1 : 0 };
   if (!correct && !s.mistakes.some(item => item.front === word.front && item.back === word.back)) s.mistakes.push(word);
@@ -221,7 +230,7 @@ function submitAnswer(answer, skipped = false) {
   const s = session; if (!s || s.feedback) return;
   if (s.mode === 'sprint' && elapsed() >= s.duration) { finishGame(); return; }
   if (!skipped && !answer.trim()) return;
-  const word = s.queue[s.index], expected = orient(word, s.direction).answer;
+  const word = s.queue[s.index], expected = orient(word, s.questionDirection).answer;
   const correct = !skipped && isCorrect(answer, expected);
   recordAnswer(word, correct); s.feedback = { correct };
   if (s.mode === 'race' && s.correct >= s.target) { finishGame(); return; }
@@ -237,7 +246,7 @@ function submitAnswer(answer, skipped = false) {
 
 function nextQuestion() {
   const s = session; if (!s) return;
-  s.index++; s.feedback = null; s.revealed = false;
+  s.index++; s.feedback = null; s.revealed = false; s.questionDirection = null;
   if (s.index >= s.queue.length) {
     if (s.mode === 'sprint' || s.mode === 'race') s.queue.push(...createQueue(s.words, Math.max(30, s.words.length)));
     else { finishGame(); return; }
@@ -248,7 +257,7 @@ function nextQuestion() {
 function renderMatching() {
   const s = session;
   const button = (index, side) => {
-    const entry = orient(s.words[index], s.direction);
+    const entry = orient(s.words[index], s.matchDirections.get(s.words[index]));
     const matched = s.matched.includes(index), selected = s[side] === index;
     return `<button class="match-word ${matched ? 'matched' : ''} ${selected ? 'picked' : ''}" data-match-index="${index}" data-match-side="${side}" aria-pressed="${selected}" ${matched || s.locked ? 'disabled' : ''}>${escape(alternatives(side === 'left' ? entry.prompt : entry.answer)[0])}${matched ? ' ✓' : ''}</button>`;
   };
@@ -260,7 +269,7 @@ function selectMatch(index, side) {
   s[side] = s[side] === index ? null : index;
   if (s.left !== null && s.right !== null) {
     const correct = s.left === s.right;
-    recordAnswer(s.words[s.left], correct);
+    recordAnswer(s.words[s.left], correct, s.matchDirections.get(s.words[s.left]));
     if (correct) {
       s.matched.push(s.left); s.left = null; s.right = null; s.matchFeedback = 'Ein tolles Paar! Weiter so. ✓';
       if (s.matched.length === s.words.length) { finishGame(); return; }
@@ -325,7 +334,7 @@ document.addEventListener('click', event => {
   if (id === 'practice-mistakes') {
     const r = result; selectedDeckId = r.deck.id; selectedMode = 'practice'; settings.difficult = false; settings.direction = r.direction;
     startGame();
-    if (session) { session.words = r.mistakes; session.queue = shuffle(r.mistakes); renderGame(); }
+    if (session) { session.words = r.mistakes; session.queue = shuffle(r.mistakes); session.questionDirection = null; renderGame(); }
   }
   if (button.dataset.useDeck) { selectedDeckId = button.dataset.useDeck; settings.difficult = false; location.hash = '#lernen'; }
   if (button.dataset.viewDeck) showDeck(allDecks().find(deck => deck.id === button.dataset.viewDeck));

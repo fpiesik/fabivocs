@@ -38,7 +38,7 @@ Der [Workflow](.github/workflows/pages.yml) prüft und baut jeden Push auf `main
 | Gegen die Uhr | Möglichst viele richtige Antworten in 30, 60 oder 120 Sekunden. |
 | Auf die Plätze! | 10, 20 oder 30 richtige Antworten so schnell wie möglich. Falsche Antworten zählen nicht zum Ziel. |
 
-Üben und beide Speedruns unterstützen **Multiple Choice** und **freies Schreiben**. Karteikarten verwenden Selbsteinschätzung; das Zuordnungsspiel eigene Wortschaltflächen. Beide Lernrichtungen sind verfügbar. Bei zu wenigen unterschiedlichen Antwortmöglichkeiten wird die freie Eingabe verwendet.
+Üben und beide Speedruns unterstützen **Multiple Choice** und **freies Schreiben**. Karteikarten verwenden Selbsteinschätzung; das Zuordnungsspiel eigene Wortschaltflächen. Als Lernrichtung stehen **Englisch → Deutsch**, **Deutsch → Englisch** und **Gemischt** zur Verfügung (bei eigenen Sprachpaaren entsprechend deren Sprachen). Bei „Gemischt“ wird die Richtung pro Frage bzw. Wortpaar zufällig gewählt und bleibt bis zur nächsten Frage unverändert, auch beim Umdrehen einer Karte. Der Lernfortschritt zählt für die tatsächlich geübte Richtung; der Filter für schwierige Wörter berücksichtigt beide Richtungen und fragt nur die noch schwierigen ab. Gemischte Speedruns haben eigene Rekorde. Bei zu wenigen unterschiedlichen Antwortmöglichkeiten wird die freie Eingabe verwendet.
 
 Groß-/Kleinschreibung, äußere und doppelte Leerzeichen sowie typografische Apostrophe werden beim Vergleich vereinheitlicht. Buchstaben, Akzente, Artikel und Satzzeichen müssen stimmen. Mit `|` hinterlegte alternative Übersetzungen werden akzeptiert. Beispiel: `Freund | Freundin`.
 

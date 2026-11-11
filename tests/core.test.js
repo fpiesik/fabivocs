@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { alternatives, createQueue, importDecks, isCorrect, localDate, makeChoices, matchingWords, normalize, orient, parseDelimited, remainingSeconds, shuffle, streak, validateDeck, vocabularySignature, wordKey } from '../src/core.js';
+import { alternatives, createQueue, importDecks, isCorrect, localDate, makeChoices, matchingWords, normalize, orient, parseDelimited, practiceDirections, remainingSeconds, shuffle, streak, validateDeck, vocabularySignature, wordKey } from '../src/core.js';
 
 test('freie Eingabe toleriert Großschreibung, Unicode und Leerraum, aber keine Rechtschreibfehler', () => {
   assert.equal(isCorrect('  GUTEN   Morgen ', 'guten Morgen'), true);
@@ -73,6 +73,32 @@ test('gemischte Warteschlangen erhalten alle Wörter, ohne Eingaben zu veränder
   assert.equal(queue.length, 8);
   assert.deepEqual(queue.slice(0, 3).sort(), words);
   assert.deepEqual(queue.slice(3, 6).sort(), words);
+});
+
+test('Gemischt bietet beide Richtungen und filtert schwierige Wörter je Richtung', () => {
+  const word = { front: 'dog', back: 'Hund' };
+  assert.deepEqual(practiceDirections(word, 'forward'), ['forward']);
+  assert.deepEqual(practiceDirections(word, 'reverse'), ['reverse']);
+  assert.deepEqual(practiceDirections(word, 'mixed'), ['forward', 'reverse']);
+  const progress = {
+    [wordKey('deck', word, 'forward')]: { wrong: 1, streak: 3 },
+    [wordKey('deck', word, 'reverse')]: { wrong: 2, streak: 0 },
+  };
+  const options = { deckId: 'deck', progress, difficult: true };
+  assert.deepEqual(practiceDirections(word, 'mixed', options), ['reverse']);
+  assert.deepEqual(practiceDirections(word, 'forward', options), []);
+  progress[wordKey('deck', word, 'forward')].streak = 0;
+  assert.deepEqual(practiceDirections(word, 'mixed', options), ['forward', 'reverse']);
+  assert.deepEqual(practiceDirections(word, 'mixed', { difficult: true }), []);
+});
+
+test('gemischte Wortpaare behalten ihre Richtung und vermeiden doppelte sichtbare Antworten', () => {
+  const words = [{ front: 'cat', back: 'Katze' }, { front: 'Hund', back: 'dog' }, { front: 'hound', back: 'Hund' }];
+  const directions = new Map([[words[0], 'forward'], [words[1], 'reverse'], [words[2], 'forward']]);
+  const selected = matchingWords(words, word => directions.get(word));
+  assert.equal(selected.length, 2);
+  assert.equal(new Set(selected.map(word => orient(word, directions.get(word)).answer)).size, 2);
+  assert.deepEqual(orient(words[1], directions.get(words[1])), { prompt: 'dog', answer: 'Hund' });
 });
 
 test('Rekordvergleich erkennt geänderte Wortlisten unabhängig von der Reihenfolge', () => {
