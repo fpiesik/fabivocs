@@ -67,6 +67,25 @@ friend;Freund | Freundin
 
 ## Gemeinsame Listen über GitHub pflegen
 
+### Direkt aus dem Trainer veröffentlichen
+
+1. Die Wörter unter **Wortschatz** importieren und die Vorschau bestätigen.
+2. Bei der eigenen Liste **Auf GitHub speichern** auswählen.
+3. Im Dialog **Datei herunterladen** anklicken. Dabei wird eine einzelne Liste im passenden Repository-Format erzeugt, ohne Lernfortschritt oder lokale Kennungen.
+4. **GitHub-Upload öffnen** anklicken und auf GitHub mit deinem Konto anmelden. Der Link öffnet bereits den Ordner `data/decks` auf `main` in `fpiesik/fabivocs`.
+5. Die heruntergeladene Datei über **choose your files** auswählen und mit **Commit changes** bestätigen. Bei einem geschützten Branch oder fehlender Schreibberechtigung muss die Änderung zuerst über einen Pull Request übernommen werden.
+6. Die erfolgreiche Ausführung des Pages-Workflows abwarten und den Trainer auf den anderen Geräten neu laden. Im Dialog gibt es einen Link zum Veröffentlichungsstatus.
+
+Die Anmeldung und die Schreibberechtigung übernimmt ausschließlich GitHub. Der Trainer speichert keine Zugangsschlüssel und benötigt weder einen zusätzlichen Dienst noch ein eigenes Passwort. Das Herunterladen oder Öffnen von GitHub bedeutet noch nicht, dass die Liste veröffentlicht wurde. Der Ablauf verwendet GitHubs [Datei-Upload im Browser](https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository).
+
+Jede Liste wird einzeln übertragen. Der Dateiname wird aus dem Listennamen und einem Inhaltsfingerabdruck erzeugt: Wiederholte Downloads derselben Liste verwenden denselben Namen; unterschiedliche Inhalte bekommen unterschiedliche Namen. Den Namen beim Upload beibehalten. Der normale **Exportieren**-Button erstellt weiterhin eine Browser-Sicherung mit einem `decks`-Array; für den Repository-Upload bitte die Datei aus **Auf GitHub speichern** verwenden.
+
+Die lokale Liste und ihr Lernfortschritt bleiben erhalten. Nach dem Deployment erscheint zusätzlich die gemeinsame Liste. Bei Bedarf kannst du die lokale Kopie später löschen. Änderungen am Inhalt erzeugen beim erneuten Veröffentlichen eine neue Datei; zum Ersetzen einer vorhandenen gemeinsamen Liste deren Datei direkt auf GitHub bearbeiten.
+
+Das Zielrepository und der Branch stehen in [src/github.js](src/github.js). Bei einem Fork diese Werte anpassen; der Veröffentlichungsbranch muss zum [Workflow](.github/workflows/pages.yml) passen.
+
+### Dateien direkt im Repository bearbeiten
+
 Eine JSON-Datei im Ordner [data/decks](data/decks) anlegen oder bearbeiten:
 
 ```json
@@ -95,8 +114,10 @@ Der Filter **Nur schwierige Wörter** enthält Wörter mit mindestens einem Fehl
 
 - [src/core.js](src/core.js): CSV-/JSON-Import, Antwortvergleich, Wortauswahl und Zeit-/Datumslogik.
 - [src/app.js](src/app.js): Oberfläche, Spielabläufe, Speicherung und Statistik.
+- [src/github.js](src/github.js): Zielrepository und Vorbereitung einzelner Listen für den GitHub-Upload.
 - [styles.css](styles.css): responsive Gestaltung, Tastaturfokus und reduzierte Bewegung.
 - [scripts/build.mjs](scripts/build.mjs): statischer Build und Validierung gemeinsamer Listen.
 - [tests/core.test.js](tests/core.test.js): automatisierte Tests mit Nodes eingebautem Test-Runner.
+- [tests/github.test.js](tests/github.test.js): Repository-Dateiformat, stabile sichere Dateinamen und große Listen.
 
 Manuelle Browserprüfung: Listen importieren und exportieren, Lernrichtung wechseln, richtige/falsche Antworten und Überspringen prüfen, alle Spielmodi abschließen, den Timer ablaufen lassen und nach Neuladen die Persistenz prüfen. Auch die Ansicht auf einem schmalen Bildschirm und Bedienung per Tastatur prüfen.
